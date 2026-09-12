@@ -42,7 +42,9 @@ export function TenderDetail() {
       setTender(t);
       setAnalyses(anArr);
       const comps = await getCompaniesByIds(t.bidderIds);
-      setCompanies(comps);
+      // Randomize initial company order so it's not pre-sorted by score
+      const unranked = [...comps].sort(() => 0.5 - Math.random());
+      setCompanies(unranked);
     }).catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
   }, [tenderId]);
@@ -52,8 +54,15 @@ export function TenderDetail() {
     setRanking(true);
     const r = await getRankedAnalyses(tenderId);
     setRanked(r);
+    // Update analyses state with assigned ranks so CompanyTable gets analysis.rank
+    setAnalyses((prev) =>
+      prev.map((a) => {
+        const found = r.find((ra) => ra.companyId === a.companyId);
+        return found ? { ...a, rank: found.rank } : a;
+      })
+    );
     // Scroll to ranking section
-    setTimeout(() => document.getElementById('ranking-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
+    setTimeout(() => document.getElementById('ranking-section')?.scrollIntoView({ behavior: 'smooth' }), 150);
     setRanking(false);
   };
 
@@ -127,11 +136,11 @@ export function TenderDetail() {
             </div>
           </div>
           <button
-            className="btn btn-primary"
+            className={`btn ${ranked ? 'btn-success' : 'btn-primary'}`}
             disabled={analyzedCount === 0 || ranking}
             onClick={handleRank}
           >
-            {ranking ? '⏳ Ranking...' : '📊 Rank Companies'}
+            {ranking ? '⏳ Ranking...' : ranked ? '✓ View Ranking Below' : '📊 Rank Companies'}
           </button>
         </div>
         {companies.length === 0
@@ -140,7 +149,7 @@ export function TenderDetail() {
               tenderId={tender.id}
               companies={companies}
               analyses={analyses}
-              showRanks={!!ranked}
+              showRanks={false}
             />
         }
       </div>

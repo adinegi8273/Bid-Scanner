@@ -31,6 +31,7 @@ export function Dashboard() {
   const completed = tenders.filter((t) => t.status === 'Completed').length;
   const attention = tenders.filter((t) => t.status === 'Pending Review').length;
 
+  // Analyzed count per tender
   const analyzedCountMap: Record<string, number> = {};
   Object.entries(analyses).forEach(([tid, anArr]) => {
     analyzedCountMap[tid] = anArr.filter((a) => a.analysisStatus === 'Analyzed').length;
@@ -58,7 +59,7 @@ export function Dashboard() {
         <div className="stat-card">
           <div className="stat-label">Completed</div>
           <div className="stat-value">{completed}</div>
-          <div className="stat-meta">Evaluation finalised</div>
+          <div className="stat-meta">All decisions finalized</div>
         </div>
         <div className="stat-card stat-attention">
           <div className="stat-label">Requiring Attention</div>
@@ -77,7 +78,10 @@ export function Dashboard() {
           ? <LoadingState message="Loading tenders..." />
           : error
             ? <ErrorState message={error} />
-            : <TenderTable tenders={tenders} analyzedCountMap={analyzedCountMap} />
+            : <TenderTable
+                tenders={tenders}
+                analyzedCountMap={analyzedCountMap}
+              />
         }
       </div>
     </AppLayout>

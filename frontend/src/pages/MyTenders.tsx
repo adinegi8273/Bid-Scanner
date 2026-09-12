@@ -28,6 +28,7 @@ export function MyTenders() {
   }, []);
 
   const filtered = filter === 'All' ? tenders : tenders.filter((t) => t.status === filter);
+
   const analyzedCountMap: Record<string, number> = {};
   Object.entries(analyses).forEach(([tid, anArr]) => {
     analyzedCountMap[tid] = anArr.filter((a) => a.analysisStatus === 'Analyzed').length;
@@ -66,7 +67,10 @@ export function MyTenders() {
           ? <LoadingState message="Loading tenders..." />
           : error
             ? <ErrorState message={error} />
-            : <TenderTable tenders={filtered} analyzedCountMap={analyzedCountMap} />
+            : <TenderTable
+                tenders={filtered}
+                analyzedCountMap={analyzedCountMap}
+              />
         }
       </div>
     </AppLayout>

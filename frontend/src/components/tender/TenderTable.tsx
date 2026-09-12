@@ -42,26 +42,38 @@ export function TenderTable({ tenders, analyzedCountMap = {} }: Props) {
           </tr>
         </thead>
         <tbody>
-          {tenders.map((t) => (
-            <tr key={t.id}>
-              <td><span className="font-mono text-sm">{t.id}</span></td>
-              <td style={{ maxWidth: 260 }}>
-                <div style={{ fontWeight: 600 }}>{t.title}</div>
-              </td>
-              <td className="td-muted">{t.department.split('(')[0].trim()}</td>
-              <td><span className="chip">{t.category}</span></td>
-              <td style={{ fontWeight: 600 }}>{formatCurrency(t.value)}</td>
-              <td className="td-muted">{formatDate(t.deadline)}</td>
-              <td style={{ textAlign: 'center' }}>{t.bidderIds.length}</td>
-              <td style={{ textAlign: 'center' }}>{analyzedCountMap[t.id] ?? 0}</td>
-              <td><TenderStatusBadge status={t.status} /></td>
-              <td>
-                <button className="btn btn-primary btn-sm" onClick={() => navigate(`/tenders/${t.id}`)}>
-                  View Tender
-                </button>
-              </td>
-            </tr>
-          ))}
+          {tenders.map((t) => {
+            const analyzed = analyzedCountMap[t.id] ?? 0;
+            const total    = t.bidderIds.length;
+
+            return (
+              <tr key={t.id}>
+                <td><span className="font-mono text-sm">{t.id}</span></td>
+                <td style={{ maxWidth: 260 }}>
+                  <div style={{ fontWeight: 600 }}>{t.title}</div>
+                </td>
+                <td className="td-muted">{t.department.split('(')[0].trim()}</td>
+                <td><span className="chip">{t.category}</span></td>
+                <td style={{ fontWeight: 600 }}>{formatCurrency(t.value)}</td>
+                <td className="td-muted">{formatDate(t.deadline)}</td>
+                <td style={{ textAlign: 'center' }}>{total}</td>
+                <td style={{ textAlign: 'center' }}>
+                  <span style={{
+                    fontWeight: 600,
+                    color: analyzed === total ? 'var(--color-success)' : analyzed > 0 ? 'var(--color-warning)' : 'var(--color-text-muted)',
+                  }}>
+                    {analyzed} / {total}
+                  </span>
+                </td>
+                <td><TenderStatusBadge status={t.status} /></td>
+                <td>
+                  <button className="btn btn-primary btn-sm" onClick={() => navigate(`/tenders/${t.id}`)}>
+                    View Tender
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
