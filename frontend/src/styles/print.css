@@ -1,0 +1,69 @@
+/* =============================================================================
+   Print stylesheet — invoked via window.print() for report export
+   ============================================================================= */
+
+@media print {
+  /* Hide navigation */
+  .sidebar, .header, .btn, .no-print { display: none !important; }
+
+  .main-area { margin-left: 0 !important; }
+  .page-content { padding: 0 !important; }
+
+  body {
+    font-size: 11pt;
+    color: #000;
+    background: #fff;
+  }
+
+  .card {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    margin-bottom: 16pt;
+  }
+
+  .report-header {
+    border-bottom: 2pt solid #1d4ed8;
+    padding-bottom: 12pt;
+    margin-bottom: 16pt;
+  }
+
+  .report-govt-logo {
+    font-size: 10pt;
+    color: #1d4ed8;
+    font-weight: 700;
+  }
+
+  table {
+    font-size: 9pt;
+    break-inside: auto;
+  }
+
+  thead { display: table-header-group; }
+  tr    { break-inside: avoid; }
+
+  .badge {
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .score-bar-wrap { display: none; }
+
+  a[href]::after { content: none; }
+
+  h1, h2, h3 { break-after: avoid; }
+
+  .decision-panel {
+    border: 2pt solid #000;
+    break-inside: avoid;
+  }
+
+  .ai-disclaimer {
+    background: #fffde7;
+    border-left: 4pt solid #f59e0b;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
