@@ -6,7 +6,7 @@
  */
 
 import { CompanyAnalysis } from '../types';
-import { mockAnalyses } from '../data/mockAnalysis';
+import { newMockAnalyses, newMockCompanies } from '../data/newMockData';
 
 const delay = (ms = 350) => new Promise((r) => setTimeout(r, ms));
 
@@ -16,7 +16,7 @@ export async function getAnalysis(
 ): Promise<CompanyAnalysis | null> {
   await delay();
   return (
-    mockAnalyses.find(
+    newMockAnalyses.find(
       (a) => a.tenderId === tenderId && a.companyId === companyId
     ) ?? null
   );
@@ -26,7 +26,26 @@ export async function getAnalysesForTender(
   tenderId: string
 ): Promise<CompanyAnalysis[]> {
   await delay();
-  return mockAnalyses.filter((a) => a.tenderId === tenderId);
+  return newMockAnalyses.filter((a) => a.tenderId === tenderId);
+}
+
+export async function rankCompaniesForTender(
+  tenderId: string
+): Promise<{ tenderId: string; rankedCompanyIds: string[] }> {
+  await delay(450);
+
+  const companiesForTender = newMockCompanies.filter((company) =>
+    company.id.startsWith('comp-')
+  );
+
+  const rankedCompanyIds = [...companiesForTender]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((company) => company.id);
+
+  return {
+    tenderId,
+    rankedCompanyIds,
+  };
 }
 
 /**
@@ -38,7 +57,7 @@ export async function getRankedAnalyses(
   tenderId: string
 ): Promise<CompanyAnalysis[]> {
   await delay(200);
-  const analyses = mockAnalyses
+  const analyses = newMockAnalyses
     .filter((a) => a.tenderId === tenderId && a.analysisStatus === 'Analyzed')
     .sort((a, b) => b.complianceScore - a.complianceScore)
     .map((a, i) => ({ ...a, rank: i + 1 }));

@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '../components/layout/AppLayout';
 import { CompanyTable } from '../components/company/CompanyTable';
-import { RankingTable } from '../components/analysis/RankingTable';
 import { LoadingState, ErrorState, EmptyState } from '../components/ui/States';
 import { TenderStatusBadge } from '../components/ui/StatusBadge';
 import { getTenderById } from '../services/tenderService';
 import { getCompaniesByIds } from '../services/companyService';
-import { getAnalysesForTender, getRankedAnalyses } from '../services/analysisService';
+import { getAnalysesForTender, rankCompaniesForTender } from '../services/analysisService';
 import { Tender, Company, CompanyAnalysis } from '../types';
 
 function formatCurrency(v: number) {
@@ -27,7 +26,7 @@ export function TenderDetail() {
   const [tender, setTender] = useState<Tender | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [analyses, setAnalyses] = useState<CompanyAnalysis[]>([]);
-  const [ranked, setRanked] = useState<CompanyAnalysis[] | null>(null);
+  const [rankedOrder, setRankedOrder] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [ranking, setRanking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +41,6 @@ export function TenderDetail() {
       setTender(t);
       setAnalyses(anArr);
       const comps = await getCompaniesByIds(t.bidderIds);
-      // Randomize initial company order so it's not pre-sorted by score
       const unranked = [...comps].sort(() => 0.5 - Math.random());
       setCompanies(unranked);
     }).catch((e) => setError(String(e)))
@@ -52,37 +50,26 @@ export function TenderDetail() {
   const handleRank = async () => {
     if (!tenderId) return;
     setRanking(true);
-    const r = await getRankedAnalyses(tenderId);
-    setRanked(r);
-    // Update analyses state with assigned ranks so CompanyTable gets analysis.rank
-    setAnalyses((prev) =>
-      prev.map((a) => {
-        const found = r.find((ra) => ra.companyId === a.companyId);
-        return found ? { ...a, rank: found.rank } : a;
-      })
-    );
-    // Scroll to ranking section
-    setTimeout(() => document.getElementById('ranking-section')?.scrollIntoView({ behavior: 'smooth' }), 150);
+    const response = await rankCompaniesForTender(tenderId);
+    setRankedOrder(response.rankedCompanyIds);
     setRanking(false);
   };
-
-  const analyzedCount = analyses.filter((a) => a.analysisStatus === 'Analyzed').length;
 
   if (loading) return <AppLayout><LoadingState message="Loading tender details..." /></AppLayout>;
   if (error || !tender) return <AppLayout><ErrorState message={error ?? 'Tender not found'} /></AppLayout>;
 
-  const rankedCompanies = ranked
-    ? ranked.map((ra) => ({ analysis: ra, company: companies.find((c) => c.id === ra.companyId)! })).filter((e) => e.company)
-    : [];
+  const displayCompanies = rankedOrder.length
+    ? rankedOrder
+        .map((id) => companies.find((company) => company.id === id))
+        .filter((company): company is Company => Boolean(company))
+    : companies;
 
   return (
     <AppLayout>
-      {/* Back nav */}
       <button className="btn btn-secondary btn-sm no-print" style={{ marginBottom: 16 }} onClick={() => navigate(-1)}>
         ← Back
       </button>
 
-      {/* Tender Header */}
       <div className="card mb-4" style={{ marginBottom: 20 }}>
         <div className="card-header">
           <div>
@@ -99,7 +86,6 @@ export function TenderDetail() {
             <div><div className="info-item-label">Estimated Value</div><div className="info-item-value" style={{ fontWeight: 700 }}>{formatCurrency(tender.value)}</div></div>
             <div><div className="info-item-label">Submission Deadline</div><div className="info-item-value">{formatDate(tender.deadline)}</div></div>
             <div><div className="info-item-label">Total Bidders</div><div className="info-item-value">{tender.bidderIds.length}</div></div>
-            <div><div className="info-item-label">Analyzed</div><div className="info-item-value">{analyzedCount} / {tender.bidderIds.length}</div></div>
           </div>
 
           <div style={{ marginBottom: 12 }}>
@@ -126,46 +112,31 @@ export function TenderDetail() {
         </div>
       </div>
 
-      {/* Rank Companies Button */}
       <div className="card mb-4" style={{ marginBottom: 20 }}>
         <div className="card-header">
           <div>
             <div className="card-title">Company Bidder List</div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginTop: 2 }}>
-              {analyzedCount} of {companies.length} companies analyzed
-            </div>
           </div>
           <button
-            className={`btn ${ranked ? 'btn-success' : 'btn-primary'}`}
-            disabled={analyzedCount === 0 || ranking}
+            className={`btn ${rankedOrder.length ? 'btn-success' : 'btn-primary'}`}
+            disabled={ranking || companies.length === 0}
             onClick={handleRank}
           >
-            {ranking ? '⏳ Ranking...' : ranked ? '✓ View Ranking Below' : '📊 Rank Companies'}
+            {ranking ? '⏳ Ranking...' : rankedOrder.length ? '✓ Rank All Companies' : '📊 Rank All Companies'}
           </button>
         </div>
-        {companies.length === 0
-          ? <EmptyState title="No bidders found" />
-          : <CompanyTable
-              tenderId={tender.id}
-              companies={companies}
-              analyses={analyses}
-              showRanks={false}
-            />
-        }
-      </div>
 
-      {/* Ranking Section */}
-      {ranked && rankedCompanies.length > 0 && (
-        <div className="card" id="ranking-section">
-          <div className="card-header">
-            <div className="card-title">📊 Company Ranking — {tender.title}</div>
-            <span className="badge badge-success">{rankedCompanies.length} companies ranked</span>
-          </div>
-          <div className="card-body">
-            <RankingTable tenderId={tender.id} entries={rankedCompanies} />
-          </div>
-        </div>
-      )}
+        {companies.length === 0 ? (
+          <EmptyState title="No bidders found" />
+        ) : (
+          <CompanyTable
+            tenderId={tender.id}
+            companies={displayCompanies}
+            analyses={analyses}
+            showRanks={rankedOrder.length > 0}
+          />
+        )}
+      </div>
     </AppLayout>
   );
 }

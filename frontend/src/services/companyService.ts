@@ -6,16 +6,16 @@
  */
 
 import { Company } from '../types';
-import { mockCompanies } from '../data/mockCompanies';
+import { newMockCompanies } from '../data/newMockData';
 
 const delay = (ms = 250) => new Promise((r) => setTimeout(r, ms));
 
 export async function getCompanyById(id: string): Promise<Company | null> {
   await delay();
-  return mockCompanies.find((c) => c.id === id) ?? null;
+  return newMockCompanies.find((c) => c.id === id) ?? null;
 }
 
 export async function getCompaniesByIds(ids: string[]): Promise<Company[]> {
   await delay();
-  return mockCompanies.filter((c) => ids.includes(c.id));
+  return newMockCompanies.filter((c) => ids.includes(c.id));
 }

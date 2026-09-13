@@ -1,8 +1,5 @@
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { Company, CompanyAnalysis } from '../../types';
-import { ComplianceStatusBadge, AnalysisStatusBadge, DecisionBadge } from '../ui/StatusBadge';
-import { ScoreDisplay } from '../ui/ScoreDisplay';
-import { useDecisions } from '../../context/DecisionContext';
 
 interface Props {
   tenderId: string;
@@ -11,98 +8,77 @@ interface Props {
   showRanks?: boolean;
 }
 
-export function CompanyTable({ tenderId, companies, analyses, showRanks = false }: Props) {
-  const navigate = useNavigate();
-  const { getDecision } = useDecisions();
+export function CompanyTable({ companies, analyses, showRanks = false }: Props) {
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   const getAnalysis = (companyId: string) =>
     analyses.find((a) => a.companyId === companyId) ?? null;
 
   return (
-    <div className="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            {showRanks && <th>Rank</th>}
-            <th>Company Name</th>
-            <th>CIN</th>
-            <th>Analysis</th>
-            <th>Score</th>
-            <th>Compliance</th>
-            <th>Officer Decision</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {companies.map((company) => {
-            const analysis = getAnalysis(company.id);
-            const decision = getDecision(tenderId, company.id);
-            const isAnalyzed = analysis?.analysisStatus === 'Analyzed';
+    <div>
+      <div className="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              {showRanks && <th>Rank</th>}
+              <th>Company Name</th>
+              <th>Submitted Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {companies.map((company) => {
+              const analysis = getAnalysis(company.id);
+              const rank = analysis?.rank ?? null;
 
-            return (
-              <tr key={company.id}>
-                {showRanks && (
+              return (
+                <tr key={company.id} onClick={() => setSelectedCompany(company)} style={{ cursor: 'pointer' }}>
+                  {showRanks && (
+                    <td>
+                      {rank ? (
+                        <span className={`rank-number rank-${rank <= 3 ? rank : 'n'}`}>
+                          #{rank}
+                        </span>
+                      ) : <span className="text-muted">—</span>}
+                    </td>
+                  )}
                   <td>
-                    {analysis?.rank ? (
-                      <span className={`rank-number rank-${analysis.rank <= 3 ? analysis.rank : 'n'}`}>
-                        #{analysis.rank}
-                      </span>
-                    ) : <span className="text-muted">—</span>}
+                    <div style={{ fontWeight: 600 }}>{company.name}</div>
+                    <div className="td-muted">{company.companyType}{company.msmeCategory ? ` · ${company.msmeCategory}` : ''}</div>
                   </td>
-                )}
-                <td>
-                  <div style={{ fontWeight: 600 }}>{company.name}</div>
-                  <div className="td-muted">{company.companyType}{company.msmeCategory ? ` · ${company.msmeCategory} Enterprise` : ''}</div>
-                </td>
-                <td><span className="font-mono text-sm td-muted">{company.cin}</span></td>
-                <td>
-                  {analysis
-                    ? <AnalysisStatusBadge status={analysis.analysisStatus} />
-                    : <span className="badge badge-neutral">Not Started</span>}
-                </td>
-                <td>
-                  {isAnalyzed && analysis
-                    ? <ScoreDisplay score={analysis.complianceScore} showBar />
-                    : <span className="text-muted">—</span>}
-                </td>
-                <td>
-                  {isAnalyzed && analysis
-                    ? <ComplianceStatusBadge status={analysis.complianceStatus} />
-                    : <span className="text-muted">—</span>}
-                </td>
-                <td>
-                  <DecisionBadge decision={decision?.decision ?? null} />
-                </td>
-                <td>
-                  <div className="flex gap-2" style={{ flexWrap: 'wrap' }}>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      disabled={!isAnalyzed}
-                      onClick={() => navigate(`/tenders/${tenderId}/companies/${company.id}`)}
-                    >
-                      Analysis
+                  <td>
+                    <button className="btn btn-secondary btn-sm" type="button">
+                      View Details
                     </button>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      disabled={!isAnalyzed || !analysis?.aiAnalysis}
-                      onClick={() => navigate(`/tenders/${tenderId}/companies/${company.id}/ai-summary`)}
-                    >
-                      AI Summary
-                    </button>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      disabled={!isAnalyzed}
-                      onClick={() => navigate(`/tenders/${tenderId}/companies/${company.id}/report`)}
-                    >
-                      Report
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {selectedCompany && (
+        <div className="card" style={{ marginTop: 18 }}>
+          <div className="card-header">
+            <div className="card-title">{selectedCompany.name}</div>
+            <button className="btn btn-secondary btn-sm" type="button" onClick={() => setSelectedCompany(null)}>
+              Close
+            </button>
+          </div>
+          <div className="card-body" style={{ maxHeight: 290, overflowY: 'auto', paddingRight: 8 }}>
+            <div className="info-grid">
+              <div><div className="info-item-label">Legal Name</div><div className="info-item-value">{selectedCompany.name ?? '—'}</div></div>
+              <div><div className="info-item-label">PAN</div><div className="info-item-value font-mono">{selectedCompany.pan ?? '—'}</div></div>
+              <div><div className="info-item-label">GSTIN</div><div className="info-item-value font-mono">{selectedCompany.gstin ?? '—'}</div></div>
+              <div><div className="info-item-label">Udyam Number</div><div className="info-item-value font-mono">{selectedCompany.udyamNumber ?? '—'}</div></div>
+              <div><div className="info-item-label">Udyam Status</div><div className="info-item-value">{selectedCompany.udyamStatus ?? '—'}</div></div>
+              <div><div className="info-item-label">Company Type</div><div className="info-item-value">{selectedCompany.companyType ?? '—'}</div></div>
+              <div><div className="info-item-label">Bid Amount</div><div className="info-item-value">{selectedCompany.bidAmount !== undefined ? `₹${selectedCompany.bidAmount.toLocaleString('en-IN')}` : '—'}</div></div>
+              <div><div className="info-item-label">City / State</div><div className="info-item-value">{selectedCompany.cityState ?? selectedCompany.registeredAddress ?? '—'}</div></div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

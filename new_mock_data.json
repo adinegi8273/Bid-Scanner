@@ -1,0 +1,148 @@
+{
+  "tenders": [
+    {
+      "tender_id": "T-3001",
+      "tender_number": "GEM/2026/B/3345671",
+      "title": "Supply of Office Networking Equipment",
+      "category": "IT Hardware",
+      "department": "Ministry of Electronics & IT",
+      "estimated_value": 4500000,
+      "submission_deadline": "2026-09-25T18:00:00+05:30",
+      "status": "under_evaluation",
+      "criteria": [
+        { "criterion_key": "pan_valid",          "criterion_name": "Valid PAN, active status",      "weight_points": 10, "is_mandatory": true },
+        { "criterion_key": "udyam_valid",        "criterion_name": "Valid Udyam/MSME registration", "weight_points": 10, "is_mandatory": true },
+        { "criterion_key": "gst_filing_current", "criterion_name": "GST returns filed up to date",  "weight_points": 10, "is_mandatory": true },
+        { "criterion_key": "not_blacklisted",    "criterion_name": "Not blacklisted/debarred",      "weight_points": 10, "is_mandatory": true }
+      ],
+      "companies": [
+        {
+          "legal_name": "TechNova Systems Pvt Ltd",
+          "pan": "ABCDE1234A",
+          "gstin": "00AAAAA0000A1ZT",
+          "udyam_number": "UDYAM-UP-12-0011111",
+          "udyam_status": "active",
+          "company_type": "msme",
+          "bid_amount": 4150000,
+          "city_state": "Noida, Uttar Pradesh"
+        },
+        {
+          "legal_name": "Vardhan Traders",
+          "pan": "ABCDE1234B",
+          "gstin": "00AAAAA0000A1ZT",
+          "udyam_number": "UDYAM-DL-08-0022222",
+          "udyam_status": "active",
+          "company_type": "msme",
+          "bid_amount": 3990000,
+          "city_state": "New Delhi"
+        },
+        {
+          "legal_name": "Orbit Hardware Pvt Ltd",
+          "pan": "ABCDE1234A",
+          "gstin": "27XXXXX0000X1Z0",
+          "udyam_number": "UDYAM-MH-27-0033333",
+          "udyam_status": "expired",
+          "company_type": "large_enterprise",
+          "bid_amount": 4080000,
+          "city_state": "Mumbai, Maharashtra"
+        }
+      ]
+    },
+    {
+      "tender_id": "T-3002",
+      "tender_number": "GEM/2026/B/3345892",
+      "title": "Supply and Installation of Solar Street Lighting Systems",
+      "category": "Renewable Energy Equipment",
+      "department": "Ministry of New and Renewable Energy",
+      "estimated_value": 8200000,
+      "submission_deadline": "2026-09-30T18:00:00+05:30",
+      "status": "under_evaluation",
+      "criteria": [
+        { "criterion_key": "pan_valid",          "criterion_name": "Valid PAN, active status",      "weight_points": 10, "is_mandatory": true },
+        { "criterion_key": "udyam_valid",        "criterion_name": "Valid Udyam/MSME registration", "weight_points": 10, "is_mandatory": true },
+        { "criterion_key": "gst_filing_current", "criterion_name": "GST returns filed up to date",  "weight_points": 10, "is_mandatory": true },
+        { "criterion_key": "not_blacklisted",    "criterion_name": "Not blacklisted/debarred",      "weight_points": 10, "is_mandatory": true }
+      ],
+      "companies": [
+        {
+          "legal_name": "SunRise Energy Pvt Ltd",
+          "pan": "ABCDE1234A",
+          "gstin": "00AAAAA0000A1ZT",
+          "udyam_number": "UDYAM-RJ-02-0044444",
+          "udyam_status": "active",
+          "company_type": "msme",
+          "bid_amount": 7650000,
+          "city_state": "Jaipur, Rajasthan"
+        },
+        {
+          "legal_name": "Green Bharat Solar LLP",
+          "pan": "ABCDE1234A",
+          "gstin": "00AAAAA0000A1ZT",
+          "udyam_number": "UDYAM-MP-04-0055555",
+          "udyam_status": "active",
+          "company_type": "msme",
+          "bid_amount": 7480000,
+          "city_state": "Bhopal, Madhya Pradesh"
+        },
+        {
+          "legal_name": "Lumen Power Systems",
+          "pan": "ABCDE1234B",
+          "gstin": "00AAAAA0000A1ZT",
+          "udyam_number": "UDYAM-KL-14-0066666",
+          "udyam_status": "expired",
+          "company_type": "startup",
+          "bid_amount": 7590000,
+          "city_state": "Kochi, Kerala"
+        }
+      ]
+    },
+    {
+      "tender_id": "T-3003",
+      "tender_number": "GEM/2026/B/3346104",
+      "title": "Supply of Medical Equipment for District Hospitals",
+      "category": "Medical Equipment",
+      "department": "Ministry of Health & Family Welfare",
+      "estimated_value": 6100000,
+      "submission_deadline": "2026-10-05T18:00:00+05:30",
+      "status": "under_evaluation",
+      "criteria": [
+        { "criterion_key": "pan_valid",          "criterion_name": "Valid PAN, active status",      "weight_points": 10, "is_mandatory": true },
+        { "criterion_key": "udyam_valid",        "criterion_name": "Valid Udyam/MSME registration", "weight_points": 10, "is_mandatory": true },
+        { "criterion_key": "gst_filing_current", "criterion_name": "GST returns filed up to date",  "weight_points": 10, "is_mandatory": true },
+        { "criterion_key": "not_blacklisted",    "criterion_name": "Not blacklisted/debarred",      "weight_points": 10, "is_mandatory": true }
+      ],
+      "companies": [
+        {
+          "legal_name": "MedCare Devices Pvt Ltd",
+          "pan": "ABCDE1234A",
+          "gstin": "00AAAAA0000A1ZT",
+          "udyam_number": "UDYAM-TN-05-0077777",
+          "udyam_status": "active",
+          "company_type": "msme",
+          "bid_amount": 5230000,
+          "city_state": "Chennai, Tamil Nadu"
+        },
+        {
+          "legal_name": "Sanjeevani Healthtech",
+          "pan": "ABCDE1234A",
+          "gstin": "00AAAAA0000A1ZT",
+          "udyam_number": "UDYAM-KA-03-0088888",
+          "udyam_status": "active",
+          "company_type": "startup",
+          "bid_amount": 5110000,
+          "city_state": "Bengaluru, Karnataka"
+        },
+        {
+          "legal_name": "Nova Surgical Supplies",
+          "pan": "ABCDE1234A",
+          "gstin": "00AAAAA0000A1ZT",
+          "udyam_number": "UDYAM-WB-10-0099999",
+          "udyam_status": "active",
+          "company_type": "large_enterprise",
+          "bid_amount": 5050000,
+          "city_state": "Kolkata, West Bengal"
+        }
+      ]
+    }
+  ]
+}

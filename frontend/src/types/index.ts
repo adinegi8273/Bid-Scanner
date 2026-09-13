@@ -47,12 +47,16 @@ export interface Tender {
 export interface Company {
   id: string;
   name: string;
-  cin: string;
-  gstin: string;
-  pan: string;
-  registeredAddress: string;
-  companyType: string; // e.g. "Private Limited", "Public Limited"
-  msmeCategory?: string; // "Micro" | "Small" | "Medium"
+  cin?: string;
+  gstin?: string;
+  pan?: string;
+  registeredAddress?: string;
+  companyType?: string;
+  msmeCategory?: string;
+  udyamNumber?: string;
+  udyamStatus?: string;
+  bidAmount?: number;
+  cityState?: string;
 }
 
 export interface ComplianceCriterion {

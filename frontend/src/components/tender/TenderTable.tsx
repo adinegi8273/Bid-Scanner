@@ -17,7 +17,7 @@ function formatDate(d: string) {
   return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-export function TenderTable({ tenders, analyzedCountMap = {} }: Props) {
+export function TenderTable({ tenders }: Props) {
   const navigate = useNavigate();
 
   if (tenders.length === 0) return (
@@ -35,45 +35,29 @@ export function TenderTable({ tenders, analyzedCountMap = {} }: Props) {
             <th>Category</th>
             <th>Value</th>
             <th>Deadline</th>
-            <th>Bidders</th>
-            <th>Analyzed</th>
             <th>Status</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          {tenders.map((t) => {
-            const analyzed = analyzedCountMap[t.id] ?? 0;
-            const total    = t.bidderIds.length;
-
-            return (
-              <tr key={t.id}>
-                <td><span className="font-mono text-sm">{t.id}</span></td>
-                <td style={{ maxWidth: 260 }}>
-                  <div style={{ fontWeight: 600 }}>{t.title}</div>
-                </td>
-                <td className="td-muted">{t.department.split('(')[0].trim()}</td>
-                <td><span className="chip">{t.category}</span></td>
-                <td style={{ fontWeight: 600 }}>{formatCurrency(t.value)}</td>
-                <td className="td-muted">{formatDate(t.deadline)}</td>
-                <td style={{ textAlign: 'center' }}>{total}</td>
-                <td style={{ textAlign: 'center' }}>
-                  <span style={{
-                    fontWeight: 600,
-                    color: analyzed === total ? 'var(--color-success)' : analyzed > 0 ? 'var(--color-warning)' : 'var(--color-text-muted)',
-                  }}>
-                    {analyzed} / {total}
-                  </span>
-                </td>
-                <td><TenderStatusBadge status={t.status} /></td>
-                <td>
-                  <button className="btn btn-primary btn-sm" onClick={() => navigate(`/tenders/${t.id}`)}>
-                    View Tender
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
+          {tenders.map((t) => (
+            <tr key={t.id}>
+              <td><span className="font-mono text-sm">{t.id}</span></td>
+              <td style={{ maxWidth: 260 }}>
+                <div style={{ fontWeight: 600 }}>{t.title}</div>
+              </td>
+              <td className="td-muted">{t.department.split('(')[0].trim()}</td>
+              <td><span className="chip">{t.category}</span></td>
+              <td style={{ fontWeight: 600 }}>{formatCurrency(t.value)}</td>
+              <td className="td-muted">{formatDate(t.deadline)}</td>
+              <td><TenderStatusBadge status={t.status} /></td>
+              <td>
+                <button className="btn btn-primary btn-sm" onClick={() => navigate(`/tenders/${t.id}`)}>
+                  View Tender
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
