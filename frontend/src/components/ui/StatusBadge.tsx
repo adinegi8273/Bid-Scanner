@@ -12,6 +12,12 @@ export function TenderStatusBadge({ status }: { status: TenderStatus }) {
     'Completed':      'info',
     'Pending Review': 'warning',
     'Expired':        'neutral',
+    'Draft':           'neutral',
+    'Open':            'success',
+    'Under Evaluation':'warning',
+    'Awarded':         'info',
+    'Cancelled':       'error',
+    'Closed':          'neutral',
   };
   return <span className={variantClass(map[status])}>{status}</span>;
 }

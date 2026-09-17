@@ -3,14 +3,12 @@ import { AppLayout } from '../components/layout/AppLayout';
 import { TenderTable } from '../components/tender/TenderTable';
 import { LoadingState, ErrorState } from '../components/ui/States';
 import { getTenders } from '../services/tenderService';
-import { getAnalysesForTender } from '../services/analysisService';
-import { Tender, CompanyAnalysis } from '../types';
+import { Tender } from '../types';
 
-type FilterStatus = 'All' | 'Active' | 'Completed' | 'Pending Review';
+type FilterStatus = 'All' | Tender['status'];
 
 export function MyTenders() {
   const [tenders, setTenders] = useState<Tender[]>([]);
-  const [analyses, setAnalyses] = useState<Record<string, CompanyAnalysis[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterStatus>('All');
@@ -19,9 +17,6 @@ export function MyTenders() {
     getTenders()
       .then(async (ts) => {
         setTenders(ts);
-        const map: Record<string, CompanyAnalysis[]> = {};
-        await Promise.all(ts.map(async (t) => { map[t.id] = await getAnalysesForTender(t.id); }));
-        setAnalyses(map);
       })
       .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
@@ -29,12 +24,7 @@ export function MyTenders() {
 
   const filtered = filter === 'All' ? tenders : tenders.filter((t) => t.status === filter);
 
-  const analyzedCountMap: Record<string, number> = {};
-  Object.entries(analyses).forEach(([tid, anArr]) => {
-    analyzedCountMap[tid] = anArr.filter((a) => a.analysisStatus === 'Analyzed').length;
-  });
-
-  const statuses: FilterStatus[] = ['All', 'Active', 'Completed', 'Pending Review'];
+  const statuses: FilterStatus[] = ['All', 'Open', 'Under Evaluation', 'Awarded', 'Closed'];
 
   return (
     <AppLayout>
@@ -69,7 +59,6 @@ export function MyTenders() {
             ? <ErrorState message={error} />
             : <TenderTable
                 tenders={filtered}
-                analyzedCountMap={analyzedCountMap}
               />
         }
       </div>

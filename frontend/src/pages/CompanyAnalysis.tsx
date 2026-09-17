@@ -1,135 +1,98 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '../components/layout/AppLayout';
-import { ComplianceBreakdown } from '../components/analysis/ComplianceBreakdown';
-import { OfficerDecision } from '../components/analysis/OfficerDecision';
-import { ScoreDisplay } from '../components/ui/ScoreDisplay';
-import { ComplianceStatusBadge, AnalysisStatusBadge } from '../components/ui/StatusBadge';
-import { LoadingState, ErrorState } from '../components/ui/States';
-import { getCompanyById } from '../services/companyService';
+import { ErrorState, LoadingState } from '../components/ui/States';
+import { getCompanyAnalysis } from '../services/analysisService';
+import { DatabaseCompanyAnalysis, DatabaseCriterion, Tender } from '../types';
 import { getTenderById } from '../services/tenderService';
-import { getAnalysis } from '../services/analysisService';
-import { Company, Tender, CompanyAnalysis } from '../types';
+
+function value(value: string | number | null | undefined) {
+  return value === null || value === undefined || value === '' ? '—' : String(value);
+}
+
+function Result({ criterion }: { criterion: DatabaseCriterion }) {
+  return (
+    <tr>
+      <td style={{ fontWeight: 600 }}>{criterion.name}</td>
+      <td><span className={`badge badge-${criterion.status === 'Passed' ? 'success' : 'error'}`}>{criterion.status}</span></td>
+      <td>{criterion.evidence}</td>
+    </tr>
+  );
+}
 
 export function CompanyAnalysisPage() {
   const { tenderId, companyId } = useParams<{ tenderId: string; companyId: string }>();
   const navigate = useNavigate();
-
-  const [company, setCompany] = useState<Company | null>(null);
+  const [analysis, setAnalysis] = useState<DatabaseCompanyAnalysis | null>(null);
   const [tender, setTender] = useState<Tender | null>(null);
-  const [analysis, setAnalysis] = useState<CompanyAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!tenderId || !companyId) return;
-    Promise.all([
-      getCompanyById(companyId),
-      getTenderById(tenderId),
-      getAnalysis(tenderId, companyId),
-    ]).then(([c, t, a]) => {
-      setCompany(c);
-      setTender(t);
-      setAnalysis(a);
-    }).catch((e) => setError(String(e)))
+    Promise.all([getCompanyAnalysis(tenderId, companyId), getTenderById(tenderId)])
+      .then(([loadedAnalysis, loadedTender]) => {
+        setAnalysis(loadedAnalysis);
+        setTender(loadedTender);
+      })
+      .catch((reason) => setError(String(reason)))
       .finally(() => setLoading(false));
   }, [tenderId, companyId]);
 
-  if (loading) return <AppLayout><LoadingState message="Loading company analysis..." /></AppLayout>;
-  if (error || !company || !tender) return <AppLayout><ErrorState message={error ?? 'Not found'} /></AppLayout>;
+  if (loading) return <AppLayout><LoadingState message="Loading database verification..." /></AppLayout>;
+  if (error || !analysis || !tender) return <AppLayout><ErrorState message={error ?? 'Analysis data not found'} /></AppLayout>;
 
-  const isAnalyzed = analysis?.analysisStatus === 'Analyzed';
-
+  const { company, verification } = analysis;
   return (
     <AppLayout>
-      {/* Back nav */}
       <button className="btn btn-secondary btn-sm no-print" style={{ marginBottom: 16 }} onClick={() => navigate(`/tenders/${tenderId}`)}>
         ← Back to Tender
       </button>
-
-      {/* Company Header */}
       <div className="card mb-4" style={{ marginBottom: 20 }}>
         <div className="card-header">
           <div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', marginBottom: 4 }}>{tender.title}</div>
-            <div className="card-title" style={{ fontSize: '1.15rem' }}>{company.name}</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: 2 }}>
-              {company.companyType}{company.msmeCategory ? ` · ${company.msmeCategory} Enterprise` : ''}
-            </div>
+            <div className="info-item-label">{tender.tenderNumber} · {tender.title}</div>
+            <div className="card-title">{company.name}</div>
           </div>
-          <div className="flex gap-3 items-center">
-            {analysis && <AnalysisStatusBadge status={analysis.analysisStatus} />}
-            {isAnalyzed && analysis && <ComplianceStatusBadge status={analysis.complianceStatus} />}
-          </div>
+          <span className="badge badge-info">Database verification</span>
         </div>
         <div className="card-body">
           <div className="info-grid">
-            <div><div className="info-item-label">CIN</div><div className="info-item-value font-mono">{company.cin}</div></div>
-            <div><div className="info-item-label">GSTIN</div><div className="info-item-value font-mono">{company.gstin}</div></div>
-            <div><div className="info-item-label">PAN</div><div className="info-item-value font-mono">{company.pan}</div></div>
-            <div><div className="info-item-label">Registered Address</div><div className="info-item-value">{company.registeredAddress}</div></div>
+            <div><div className="info-item-label">Company ID</div><div className="info-item-value font-mono">{company.id}</div></div>
+            <div><div className="info-item-label">PAN</div><div className="info-item-value font-mono">{value(company.pan)}</div></div>
+            <div><div className="info-item-label">GSTIN</div><div className="info-item-value font-mono">{value(company.gstin)}</div></div>
+            <div><div className="info-item-label">Udyam Number</div><div className="info-item-value font-mono">{value(company.udyamNumber)}</div></div>
+            <div><div className="info-item-label">Company Type</div><div className="info-item-value">{value(company.companyType)}</div></div>
+            <div><div className="info-item-label">City / State</div><div className="info-item-value">{value(company.cityState)}</div></div>
+            <div><div className="info-item-label">Bid Amount</div><div className="info-item-value">{company.bidAmount === null || company.bidAmount === undefined ? '—' : `₹${company.bidAmount.toLocaleString('en-IN')}`}</div></div>
           </div>
         </div>
       </div>
 
-      {/* Score + Quick Actions */}
-      {isAnalyzed && analysis && (
-        <div className="card mb-4" style={{ marginBottom: 20 }}>
-          <div className="card-body" style={{ display: 'flex', gap: 32, alignItems: 'center', flexWrap: 'wrap' }}>
-            <div>
-              <div className="info-item-label">Compliance Score</div>
-              <ScoreDisplay score={analysis.complianceScore} size="lg" showBar />
-            </div>
-            <div>
-              <div className="info-item-label">Status</div>
-              <div style={{ marginTop: 6 }}><ComplianceStatusBadge status={analysis.complianceStatus} /></div>
-            </div>
-            {analysis.rank && (
-              <div>
-                <div className="info-item-label">Rank</div>
-                <div className="info-item-value" style={{ fontWeight: 700, fontSize: '1.2rem', marginTop: 4 }}>#{analysis.rank}</div>
-              </div>
-            )}
-            <div className="flex gap-2" style={{ marginLeft: 'auto' }}>
-              <button className="btn btn-secondary" onClick={() => navigate(`/tenders/${tenderId}/companies/${companyId}/ai-summary`)} disabled={!analysis.aiAnalysis}>
-                🤖 See AI Summary
-              </button>
-              <button className="btn btn-primary" onClick={() => navigate(`/tenders/${tenderId}/companies/${companyId}/report`)}>
-                📄 Detailed Report
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Compliance Breakdown */}
       <div className="card mb-4" style={{ marginBottom: 20 }}>
-        <div className="card-header">
-          <div className="card-title">Compliance Criteria Breakdown</div>
-          {isAnalyzed && analysis && (
-            <span className="badge badge-info">
-              {analysis.criteria.filter(c => c.status === 'Passed').length} / {analysis.criteria.length} passed
-            </span>
-          )}
+        <div className="card-header"><div className="card-title">Verification Registry Results</div></div>
+        <div className="card-body">
+          <div className="info-grid">
+            <div><div className="info-item-label">PAN Status</div><div className="info-item-value">{value(verification.panStatus)}</div></div>
+            <div><div className="info-item-label">GST Filing Status</div><div className="info-item-value">{value(verification.gstFilingStatus)}</div></div>
+            <div><div className="info-item-label">GST Linked PAN</div><div className="info-item-value font-mono">{value(verification.gstLinkedPan)}</div></div>
+            <div><div className="info-item-label">Udyam Enterprise Type</div><div className="info-item-value">{value(verification.udyamEnterpriseType)}</div></div>
+            <div><div className="info-item-label">Udyam Status</div><div className="info-item-value">{value(verification.udyamStatus)}</div></div>
+            <div><div className="info-item-label">GeM Blacklisted</div><div className="info-item-value">{verification.isBlacklisted === null ? '—' : verification.isBlacklisted ? 'Yes' : 'No'}</div></div>
+            {verification.blacklistReason && <div><div className="info-item-label">Blacklist Reason</div><div className="info-item-value">{verification.blacklistReason}</div></div>}
+          </div>
         </div>
-        {!isAnalyzed || !analysis
-          ? (
-            <div className="state-center" style={{ padding: '32px 16px' }}>
-              <div className="state-icon">⏳</div>
-              <div className="state-title">Analysis {analysis?.analysisStatus ?? 'not started'}</div>
-              <div className="state-desc">Compliance criteria will appear once analysis is complete.</div>
-            </div>
-          )
-          : <ComplianceBreakdown criteria={analysis.criteria} />
-        }
       </div>
 
-      {/* Officer Decision */}
-      {tenderId && companyId && (
-        <div>
-          <OfficerDecision tenderId={tenderId} companyId={companyId} />
+      <div className="card">
+        <div className="card-header"><div className="card-title">Tender Criteria Results</div></div>
+        <div className="table-wrapper">
+          <table>
+            <thead><tr><th>Criterion</th><th>Status</th><th>Evidence from database</th></tr></thead>
+            <tbody>{analysis.criteria.map((criterion) => <Result key={criterion.key} criterion={criterion} />)}</tbody>
+          </table>
         </div>
-      )}
+      </div>
     </AppLayout>
   );
 }
