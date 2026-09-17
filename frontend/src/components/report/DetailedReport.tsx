@@ -10,13 +10,15 @@ interface Props {
   decision: OfficerDecisionRecord | null;
 }
 
-function formatCurrency(v: number) {
+function formatCurrency(v: number | null) {
+  if (v === null) return '—';
   if (v >= 10000000) return `₹${(v / 10000000).toFixed(2)} Crore`;
   if (v >= 100000)   return `₹${(v / 100000).toFixed(2)} Lakh`;
   return `₹${v.toLocaleString('en-IN')}`;
 }
 
-function formatDate(d: string) {
+function formatDate(d: string | null) {
+  if (!d) return '—';
   return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 

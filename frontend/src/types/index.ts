@@ -1,6 +1,6 @@
 // ─── Core Domain Types ──────────────────────────────────────────────────────
 
-export type TenderStatus = 'Active' | 'Completed' | 'Pending Review' | 'Expired';
+export type TenderStatus = 'Active' | 'Completed' | 'Pending Review' | 'Expired' | 'Draft' | 'Open' | 'Under Evaluation' | 'Awarded' | 'Cancelled' | 'Closed';
 
 export type AnalysisStatus = 'Analyzed' | 'Pending' | 'In Progress';
 
@@ -32,16 +32,15 @@ export interface Officer {
 
 export interface Tender {
   id: string;
+  tenderNumber: string;
   title: string;
-  department: string;
-  category: string;
-  description: string;
-  value: number; // INR
-  deadline: string; // ISO date string
-  eligibilityRequirements: string[];
+  department: string | null;
+  category: string | null;
+  value: number | null; // INR
+  deadline: string | null; // ISO date string
   complianceCriteria: string[];
   status: TenderStatus;
-  bidderIds: string[];
+  bidderCount: number;
 }
 
 export interface Company {
@@ -57,6 +56,30 @@ export interface Company {
   udyamStatus?: string;
   bidAmount?: number;
   cityState?: string;
+}
+
+export interface VerificationResult {
+  panStatus: string | null;
+  gstLinkedPan: string | null;
+  gstFilingStatus: string | null;
+  udyamEnterpriseType: string | null;
+  udyamStatus: string | null;
+  isBlacklisted: boolean | null;
+  blacklistReason: string | null;
+}
+
+export interface DatabaseCriterion {
+  key: string;
+  name: string;
+  mandatory: boolean;
+  status: 'Passed' | 'Failed';
+  evidence: string;
+}
+
+export interface DatabaseCompanyAnalysis {
+  company: Company;
+  verification: VerificationResult;
+  criteria: DatabaseCriterion[];
 }
 
 export interface ComplianceCriterion {

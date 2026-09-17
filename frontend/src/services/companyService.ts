@@ -1,21 +1,22 @@
-/**
- * companyService.ts
- *
- * Interface for company-related API calls.
- * Mock-backed; replace bodies with axios calls when backend is ready.
- */
-
+import axios from 'axios';
 import { Company } from '../types';
-import { newMockCompanies } from '../data/newMockData';
 
-const delay = (ms = 250) => new Promise((r) => setTimeout(r, ms));
+const api = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8000' });
 
 export async function getCompanyById(id: string): Promise<Company | null> {
-  await delay();
-  return newMockCompanies.find((c) => c.id === id) ?? null;
+  try {
+    return (await api.get<Company>(`/api/companies/${id}`)).data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) return null;
+    throw error;
+  }
 }
 
 export async function getCompaniesByIds(ids: string[]): Promise<Company[]> {
-  await delay();
-  return newMockCompanies.filter((c) => ids.includes(c.id));
+  const responses = await Promise.all(ids.map((id) => api.get<Company>(`/api/companies/${id}`)));
+  return responses.map((response) => response.data);
+}
+
+export async function getCompaniesForTender(tenderId: string): Promise<Company[]> {
+  return (await api.get<Company[]>(`/api/tenders/${tenderId}/companies`)).data;
 }

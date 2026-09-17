@@ -7,13 +7,15 @@ interface Props {
   analyzedCountMap?: Record<string, number>;
 }
 
-function formatCurrency(v: number) {
+function formatCurrency(v: number | null) {
+  if (v === null) return '—';
   if (v >= 10000000) return `₹${(v / 10000000).toFixed(1)} Cr`;
   if (v >= 100000)   return `₹${(v / 100000).toFixed(1)} L`;
   return `₹${v.toLocaleString('en-IN')}`;
 }
 
-function formatDate(d: string) {
+function formatDate(d: string | null) {
+  if (!d) return '—';
   return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
@@ -46,7 +48,7 @@ export function TenderTable({ tenders }: Props) {
               <td style={{ maxWidth: 260 }}>
                 <div style={{ fontWeight: 600 }}>{t.title}</div>
               </td>
-              <td className="td-muted">{t.department.split('(')[0].trim()}</td>
+              <td className="td-muted">{t.department ?? '—'}</td>
               <td><span className="chip">{t.category}</span></td>
               <td style={{ fontWeight: 600 }}>{formatCurrency(t.value)}</td>
               <td className="td-muted">{formatDate(t.deadline)}</td>
